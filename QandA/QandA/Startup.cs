@@ -55,6 +55,8 @@ namespace QandA
                 options.Audience = Configuration["Auth0:Audience"];
             });
 
+            services.AddHttpClient();
+
             services.AddMemoryCache();
 
             services.AddControllers();

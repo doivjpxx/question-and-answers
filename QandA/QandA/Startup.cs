@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 using DbUp;
 using QandA.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using QandA.Authorization;
 
 namespace QandA
 {
@@ -57,6 +59,16 @@ namespace QandA
 
             services.AddHttpClient();
 
+            services.AddCors(options =>
+                options.AddPolicy("CorsPolicy", builder =>
+                builder
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .WithOrigins(Configuration["Frontend"])));
+
+            services.AddAuthorization(options => options.AddPolicy("MustBeQuestionAuthor", policy =>
+            policy.Requirements.Add(new MustBeQuestionAuthorRequirement())));
+
             services.AddMemoryCache();
 
             services.AddControllers();
@@ -67,6 +79,8 @@ namespace QandA
 
             services.AddScoped<IDataRepository, DataRepository>();
             services.AddSingleton<IQuestionCache, QuestionCache>();
+            services.AddScoped<IAuthorizationHandler, MustBeQuestionAuthorHandler>();
+            services.AddHttpContextAccessor();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -84,6 +98,8 @@ namespace QandA
             }
 
             app.UseRouting();
+
+            app.UseCors("CorsPolicy");
 
             app.UseAuthentication();
 

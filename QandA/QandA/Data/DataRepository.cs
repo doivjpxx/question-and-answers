@@ -176,7 +176,7 @@ namespace QandA.Data
             }
         }
 
-        public QuestionGetSingleResponse PutQuestion(int questionId, QuestionPutRequest question)
+        public async Task<QuestionGetSingleResponse> PutQuestion(int questionId, QuestionPutRequest question)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -189,7 +189,7 @@ namespace QandA.Data
                         question.Title,
                         question.Content
                     });
-                return GetQuestion(questionId);
+                return await GetQuestion(questionId);
             }
         }
 

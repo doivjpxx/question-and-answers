@@ -51,13 +51,13 @@ namespace QandA.Controllers
 
         [AllowAnonymous]
         [HttpGet("{questionId}")]
-        public ActionResult<QuestionGetSingleResponse> GetQuestion(int questionId)
+        public async Task<ActionResult<QuestionGetSingleResponse>> GetQuestion(int questionId)
         {
             var question = _questionCache.Get(questionId);
 
             if (question == null)
             {
-                question = _dataRepository.GetQuestion(questionId);
+                question = await _dataRepository.GetQuestion(questionId);
                 if (question == null)
                 {
                     return NotFound();
@@ -67,11 +67,11 @@ namespace QandA.Controllers
             return question;
         }
 
-        [Authorize]
+        [Authorize(Policy = "MustBeQuestionAuthor")]
         [HttpPost]
-        public ActionResult<QuestionGetSingleResponse> PostQuestion(QuestionPostFullRequest questionPostRequest)
+        public async Task<ActionResult<QuestionGetSingleResponse>> PostQuestion(QuestionPostFullRequest questionPostRequest)
         {
-            var savedQuestion = _dataRepository.PostQuestion(new QuestionPostFullRequest
+            var savedQuestion = await _dataRepository.PostQuestion(new QuestionPostFullRequest
             {
                 Title = questionPostRequest.Title,
                 Content = questionPostRequest.Content,
@@ -82,11 +82,11 @@ namespace QandA.Controllers
             return CreatedAtAction(nameof(GetQuestion), new { questionId = savedQuestion.QuestionId }, savedQuestion);
         }
 
-        [Authorize]
+        [Authorize(Policy = "MustBeQuestionAuthor")]
         [HttpPut("{questionId}")]
-        public ActionResult<QuestionGetSingleResponse> PutQuestion(int questionId, QuestionPutRequest questionPutRequest)
+        public async Task<ActionResult<QuestionGetSingleResponse>> PutQuestion(int questionId, QuestionPutRequest questionPutRequest)
         {
-            var question = _dataRepository.GetQuestion(questionId);
+            var question = await _dataRepository.GetQuestion(questionId);
             if (question == null)
             {
                 return NotFound();
@@ -95,13 +95,13 @@ namespace QandA.Controllers
             questionPutRequest.Title = string.IsNullOrEmpty(questionPutRequest.Title) ? question.Title : questionPutRequest.Title;
             questionPutRequest.Content = string.IsNullOrEmpty(questionPutRequest.Content) ? question.Content : questionPutRequest.Content;
 
-            var savedQuestion = _dataRepository.PutQuestion(questionId, questionPutRequest);
+            var savedQuestion = await _dataRepository.PutQuestion(questionId, questionPutRequest);
 
             _questionCache.Remove(questionId);
             return savedQuestion;
         }
 
-        [Authorize]
+        [Authorize(Policy = "MustBeQuestionAuthor")]
         [HttpDelete("{questionId}")]
         public ActionResult DeleteQuestion(int questionId)
         {

@@ -20,15 +20,15 @@ namespace QandA.Data
 
         Task<IEnumerable<QuestionGetManyResponse>> GetUnAnsweredQuestionsAsync();
 
-        QuestionGetSingleResponse GetQuestion(int questionId);
+        Task<QuestionGetSingleResponse> GetQuestion(int questionId);
 
         bool QuestionExists(int questionId);
 
         AnswerGetResponse GetAnswer(int answerId);
 
-        QuestionGetSingleResponse PostQuestion(QuestionPostFullRequest question);
+        Task<QuestionGetSingleResponse> PostQuestion(QuestionPostFullRequest question);
 
-        QuestionGetSingleResponse PutQuestion(int questionId, QuestionPutRequest question);
+        Task<QuestionGetSingleResponse> PutQuestion(int questionId, QuestionPutRequest question);
 
         void DeleteQuestion(int questionId);
 

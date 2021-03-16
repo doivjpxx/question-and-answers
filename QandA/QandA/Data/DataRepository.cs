@@ -43,23 +43,23 @@ namespace QandA.Data
             }
         }
 
-        public QuestionGetSingleResponse GetQuestion(int questionId)
+        public async Task<QuestionGetSingleResponse> GetQuestion(int questionId)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
-                connection.Open();
-                using (GridReader results = connection.QueryMultiple(@"EXEC dbo.Question_GetSingle
-                    @QuestionId = @QuestionId; EXEC dbo.Answer_Get_ByQuestionId @QuestionId = @QuestionId", 
+                await connection.OpenAsync();
+                using (GridReader results = await connection.QueryMultipleAsync(
+                    @"EXEC dbo.Question_GetSingle @QuestionId = @QuestionId; 
+                      EXEC dbo.Answer_Get_ByQuestionId @QuestionId = @QuestionId",
                     new { QuestionId = questionId }))
                 {
-                    var question = results.Read<QuestionGetSingleResponse>().FirstOrDefault();
+                    var question = (await results.ReadAsync<QuestionGetSingleResponse>()).FirstOrDefault();
                     if (question != null)
                     {
-                        question.Answers = results.Read<AnswerGetResponse>().ToList();
+                        question.Answers = (await results.ReadAsync<AnswerGetResponse>()).ToList();
                     }
                     return question;
                 }
-              
             }
         }
 
@@ -164,7 +164,7 @@ namespace QandA.Data
             }
         }
 
-        public QuestionGetSingleResponse PostQuestion(QuestionPostFullRequest question)
+        public async Task<QuestionGetSingleResponse> PostQuestion(QuestionPostFullRequest question)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -172,7 +172,7 @@ namespace QandA.Data
                 var questionId = connection.QueryFirst<int>(@"EXEC dbo.Question_Post 
                     @Title = @Title, @Content = @Content, @UserId = @UserId, @UserName = @UserName,
                     @Created = @Created", question);
-                return GetQuestion(questionId);
+                return await GetQuestion(questionId);
             }
         }
 
